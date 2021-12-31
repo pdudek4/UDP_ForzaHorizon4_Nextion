@@ -16,12 +16,15 @@ public:
 
     QUdpSocket *udpSocketGet;
 
+    QString GetMyIP();
     void HelloUDP();
     void SendUDP(QByteArray Data);
     void GetRPM();
     void show();
     float ret_rpm();
     float ret_speed();
+    float ret_yaw();
+    uint8_t ret_gear();
 signals:
 
 public slots:
@@ -32,11 +35,15 @@ private:
 
     QHostAddress *telefon;
     QHostAddress *komputer;
+    QHostAddress *xbox;
     quint16 receiverPort;
     QByteArray rcv_buffer;
 
     float rpm;
+    float rpmMax;
     float speed;
+    float yaw;
+    uint8_t gear;
 
 
 };

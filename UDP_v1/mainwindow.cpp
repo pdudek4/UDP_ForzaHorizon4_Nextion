@@ -11,14 +11,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->progressBarRpm->setMinimum(0);
-    ui->progressBarRpm->setMaximum(9000);
+    ui->progressBarRpm->setMaximum(100);
 
     this->device = new QSerialPort(this);
 
    timer1 = new QTimer(this);
 
    connect(timer1, SIGNAL(timeout()), this, SLOT(run()));
-   timer1->start(50);
+   timer1->start(200);
 
 }
 
@@ -26,13 +26,14 @@ MainWindow::~MainWindow()
 {
     delete device;
     delete ui;
+    delete timer1;
 }
 
 void MainWindow::run()
 {
        //ui->progressBarRpm->setValue(clientUDP->ret_rpm());
-       //ui->progressBarRpm->setValue(8000);
-       //clientUDP->show();
+    //ui->progressBarRpm->setValue(clientUDP->ret_yaw());
+       //clientUDP->show(); //show debug
     on_pushButtonSend_clicked();
 }
 
@@ -40,29 +41,21 @@ void MainWindow::run()
 
 void MainWindow::on_pushButtonSend_clicked()
 {
-    //qDebug() << "wyslano UDP";
-    //QString text_wpr = ui->lineEditSend->text();
-    //ui->lineEditSend->clear();
-    //QByteArray dane = text_wpr.toLocal8Bit();
-        //clientUDP->SendUDP(dane);
-    //run();
     char buf[20];
-
-//    static int spd = 0;
-//    static int rpmm = 4000;
-
-//    spd++, rpmm++;
-//if(spd==200) spd = 0;
-    //sprintf(buf, "%03d%04d", spd, rpmm);
 
     int sp = static_cast<int>(clientUDP->ret_speed());
     int rp = static_cast<int>(clientUDP->ret_rpm());
-if(sp<0) sp = -sp;
-    sprintf(buf, "%03d%04d", sp,  rp);
-    sendMessageToDevice(buf);
+    float yw = static_cast<float>(clientUDP->ret_yaw());
+    uint8_t gr = static_cast<float>(clientUDP->ret_yaw());
 
-//qDebug() << rp;
-//qDebug() << sp;
+//  UART TEST VALUES
+//    sp = 111;
+//    rp = 2222;
+
+    sprintf(buf, "%03d%04d%4.2f%d", sp,  rp, yw, gr);
+
+    if(device->isOpen())
+        sendMessageToDevice(buf);
 
 }
 
@@ -73,6 +66,7 @@ void MainWindow::on_lineEditSend_returnPressed()
 
 void MainWindow::on_pushButtonSearch_clicked()
 {
+    ui->comboBoxDevices->clear();
     this->addToLogs("Szukam urządzeń...");
     QList<QSerialPortInfo> devices;
     devices = QSerialPortInfo::availablePorts();
@@ -151,7 +145,7 @@ void MainWindow::sendMessageToDevice(QString message)
     else {
         this->addToLogs("Nie mogę wysłać wiadomości. Port nie jest otwarty!");
     }
-   //this->addToLogs("Wysyłam do NXT: " + message);
+   this->addToLogs(message);
 
 }
 
